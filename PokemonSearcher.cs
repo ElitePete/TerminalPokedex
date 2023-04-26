@@ -76,7 +76,7 @@ namespace TerminalPokedex
                     Console.WriteLine("");
                     Console.WriteLine("Images of Pokemon \n \n(Hold CTRL and click on the link to automatically open in browser)");
                     Console.WriteLine("");
-                    Console.WriteLine($"https://www.google.com/search?q={pokemon.Name.ToLower()}&source=lnms&tbm=isch&sa=X&ved=2ahUKEwiclqKsnsD-AhURmWoFHQljDsYQ0pQJegQIAhAC&biw=1879&bih=931");
+                    Console.WriteLine($"https://pokemondb.net/pokedex/{pokemon.Name.ToLower()}");
                     Console.WriteLine("");
                     Console.WriteLine("Would you like to search another?");
                     Console.WriteLine("");
@@ -86,7 +86,7 @@ namespace TerminalPokedex
                     if (repeatSearchAnswer == "1") 
                     {
                         Console.Clear();
-                        await Program.SecondaryMain();
+                        await Program.RepeatPokemonSearch();
                     }
                     else if (repeatSearchAnswer == "2")
                     {
@@ -99,13 +99,14 @@ namespace TerminalPokedex
                     else
                     {
                         Console.Clear();
-                        Console.WriteLine("Thanks for using T-Pokedex \n" );
-                        Thread.Sleep(1000);
-                        Environment.Exit(0);
+                        Console.WriteLine("Invalid Input, it must be a number. Returning to main menu. Hang tight! \n" );
+                        Thread.Sleep(2000);
+                        Console.Clear();
+                        await Program.Main(new string[0]);
                     }
 
 
-                    
+
                 }
                 catch (HttpRequestException)
                 {
@@ -161,7 +162,7 @@ namespace TerminalPokedex
                     Console.WriteLine($"Smoothness: {berry.Smoothness}");
                     Console.WriteLine($"Soil Dryness: {berry.Soil_Dryness} \n");
 
-                    Console.WriteLine("Would you like to go back to \n1. Main menu \n2. Exit TPokedex \n");
+                    Console.WriteLine("Would you like to go back to \n1. Main menu \n2. Exit TPokedex \nOr \n3. Search Another Berry");
                     string berryMenuResponse = Console.ReadLine();
                     switch (berryMenuResponse)
                     {
@@ -171,6 +172,10 @@ namespace TerminalPokedex
                             break;
                         case "2":
                             Environment.Exit(0);
+                            break;
+                        case "3":
+                            Console.Clear();
+                            await Program.OptionTwo();
                             break;
                         default:
                             Console.Clear();
@@ -187,6 +192,7 @@ namespace TerminalPokedex
                     Console.WriteLine("Try again: ");
                     name = Console.ReadLine();
                     Console.Clear();
+                    await SearchBerries(name);
                 }
                 catch (Exception ex)
                 {
@@ -194,6 +200,7 @@ namespace TerminalPokedex
                     Console.WriteLine("EXC: Search Another One: ");
                     name = Console.ReadLine();
                     Console.Clear();
+                    await SearchBerries(name);
                 }
             }
             else
@@ -203,6 +210,155 @@ namespace TerminalPokedex
             }
 
 
+        }
+
+        public static async Task SearchItem(string? name)
+        {
+            if (name is not null)
+            {
+                try
+                {
+                    // Set up an HttpClient to make requests to the PokeAPI
+                    var httpClient = new HttpClient();
+                    httpClient.BaseAddress = new Uri("https://pokeapi.co/api/v2/");
+
+                    // Make a request for information about a specific Pokemon
+                    var response = await httpClient.GetAsync($"item/{name?.ToLower()}");
+                    response.EnsureSuccessStatusCode(); // Throw an exception if the status code is not in the 2xx range
+
+                    var responseContent = await response.Content.ReadAsStringAsync();
+
+                    // Deserialize the JSON response into a berry object
+                    var item = JsonConvert.DeserializeObject<Item>(responseContent);
+
+
+                    Console.WriteLine($"Item Id: {item.Id}");
+                    Console.WriteLine($"Item Name: {item.Name}");
+                    Console.WriteLine($"Item Cost: {item.Cost}");
+                    Console.WriteLine($"Fling Power: {item.Fling_Power}");
+
+                    Console.WriteLine("Would you like to go back to \n1. Main menu \n2. Exit TPokedex \nOr \n3. Search Another Item");
+                    string itemMenuResponse = Console.ReadLine();
+                    switch (itemMenuResponse)
+                    {
+                        case "1":
+                            Console.Clear();
+                            await Program.Main(new string[0]);
+                            break;
+                        case "2":
+                            Environment.Exit(0);
+                            break;
+                        case "3":
+                            Console.Clear();
+                            await Program.OptionThree();
+                            break;
+                        default:
+                            Console.Clear();
+                            await Program.Main(new string[0]);
+                            break;
+                    }
+
+
+                }
+                catch (HttpRequestException)
+                {
+                    Console.WriteLine($"Error: Item {name} not found");
+
+                    Console.WriteLine("Try again: ");
+                    name = Console.ReadLine();
+                    Console.Clear();
+                    await SearchItem(name);
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Error: {ex.Message}");
+                    Console.WriteLine("EXC: Search Another One: ");
+                    name = Console.ReadLine();
+                    Console.Clear();
+                    await SearchItem(name);
+                }
+            }
+            else
+            {
+                Console.Clear();
+                Console.WriteLine("Item Does Not Exist");
+            }
+        }
+
+        public static async Task SearchMove(string? name)
+        {
+            if (name is not null)
+            {
+                try
+                {
+                    // Set up an HttpClient to make requests to the PokeAPI
+                    var httpClient = new HttpClient();
+                    httpClient.BaseAddress = new Uri("https://pokeapi.co/api/v2/");
+
+                    // Make a request for information about a specific Pokemon
+                    var response = await httpClient.GetAsync($"move/{name?.ToLower()}");
+                    response.EnsureSuccessStatusCode(); // Throw an exception if the status code is not in the 2xx range
+
+                    var responseContent = await response.Content.ReadAsStringAsync();
+
+                    // Deserialize the JSON response into a berry object
+                    var move = JsonConvert.DeserializeObject<Move>(responseContent);
+
+
+                    Console.WriteLine($"Move Id: {move.Id}");
+                    Console.WriteLine($"Move Name: {move.Name}");
+                    Console.WriteLine($"Move Accuracy: {move.Accuracy}%");
+                    Console.WriteLine($"Effect Chance: {move.Effect_Chance}");
+                    Console.WriteLine($"Power Points(pp): {move.PP}");
+                    Console.WriteLine($"Priority: {move.Priority}");
+                    Console.WriteLine($"Power: {move.Power}");
+
+                    Console.WriteLine("Would you like to go back to \n1. Main menu \n2. Exit TPokedex \nOr \n3. Search Another Move");
+                    string moveMenuResponse = Console.ReadLine();
+                    switch (moveMenuResponse)
+                    {
+                        case "1":
+                            Console.Clear();
+                            await Program.Main(new string[0]);
+                            break;
+                        case "2":
+                            Environment.Exit(0);
+                            break;
+                        case "3":
+                            Console.Clear();
+                            await Program.OptionFour();
+                            break;
+                        default:
+                            Console.Clear();
+                            await Program.Main(new string[0]);
+                            break;
+                    }
+
+
+                }
+                catch (HttpRequestException)
+                {
+                    Console.WriteLine($"Error: Move {name} not found");
+
+                    Console.WriteLine("Try again: ");
+                    name = Console.ReadLine();
+                    Console.Clear();
+                    await SearchMove(name);
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Error: {ex.Message}");
+                    Console.WriteLine("EXC: Search Another One: ");
+                    name = Console.ReadLine();
+                    Console.Clear();
+                    await SearchMove(name);
+                }
+            }
+            else
+            {
+                Console.Clear();
+                Console.WriteLine("Move Does Not Exist");
+            }
         }
 
         class Pokemon
@@ -228,6 +384,25 @@ namespace TerminalPokedex
             public int? Size { get; set; }
             public int? Smoothness { get; set; }
             public int? Soil_Dryness { get; set; }
+        }
+
+        class Item
+        {
+            public int? Id { get; set; }
+            public string? Name { get; set; }
+            public int? Cost { get; set; }
+            public int? Fling_Power { get; set; }
+        }
+
+        class Move
+        {
+            public int? Id { get; set; }
+            public string? Name { get; set; }   
+            public int? Accuracy { get; set; }
+            public int? Effect_Chance { get; set; }
+            public int? PP { get; set; }
+            public int? Priority { get; set; }
+            public int? Power { get; set; }
         }
 
         class LocationAreaEncounter
